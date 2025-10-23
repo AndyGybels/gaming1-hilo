@@ -1,0 +1,31 @@
+syntax = "proto3";
+option csharp_namespace = "HiLoGame.Grpc";
+package hilo;
+
+service HiLo {
+  rpc StartGame (StartGameRequest) returns (StartGameReply);
+  rpc Guess (GuessRequest) returns (GuessReply);
+  rpc SubscribeToGame (SubscribeRequest) returns (stream GameUpdate);
+}
+
+message StartGameRequest { int32 min = 1; int32 max = 2; }
+message StartGameReply { string gameId = 1; string message = 2; }
+
+message GuessRequest { string gameId = 1; string player = 2; int32 number = 3; }
+message GuessReply { string result = 1; bool isOver = 2; string winner = 3; int32 attempts = 4; }
+
+message SubscribeRequest { string gameId = 1; }
+enum UpdateType {
+  UNKNOWN = 0;
+  START = 1;
+  GUESS = 2;
+}
+
+message GameUpdate {
+  UpdateType type = 1;
+  string message = 2;
+  string player = 3;
+  int32 attempts = 4;
+  bool isOver = 5;
+  string winner = 6;
+}
