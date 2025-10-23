@@ -9,13 +9,15 @@ public class HiLoService : HiLo.HiLoBase
     private readonly ILogger<HiLoService> _logger;
     private readonly StartGameHandler _startHandler;
     private readonly MakeGuessHandler _guessHandler;
+    private readonly ListGamesHandler _listHandler;
     private readonly GameUpdatePublisher _publisher;
 
-    public HiLoService(ILogger<HiLoService> logger, StartGameHandler startHandler, MakeGuessHandler guessHandler, GameUpdatePublisher publisher)
+    public HiLoService(ILogger<HiLoService> logger, StartGameHandler startHandler, MakeGuessHandler guessHandler, ListGamesHandler listHandler, GameUpdatePublisher publisher)
     {
         _logger = logger;
         _startHandler = startHandler;
         _guessHandler = guessHandler;
+        _listHandler = listHandler;
         _publisher = publisher;
     }
 
@@ -97,5 +99,27 @@ public class HiLoService : HiLo.HiLoBase
             _logger.LogWarning(ex, "Error while streaming updates to client {Peer} for game {GameId}", context.Peer, gameId);
             throw;
         }
+    }
+
+    public override async Task<ListGamesReply> ListGames(ListGamesRequest request, ServerCallContext context)
+    {
+        // Retrieve all games via application layer
+        var games = await _listHandler.Handle(new ListGamesQuery());
+
+        var reply = new ListGamesReply();
+        foreach (var g in games)
+        {
+            reply.Games.Add(new GameInfo
+            {
+                GameId = g.Id.ToString(),
+                Min = g.Min,
+                Max = g.Max,
+                IsOver = g.IsOver,
+                Winner = g.Winner ?? string.Empty,
+                Attempts = g.Attempts
+            });
+        }
+
+        return reply;
     }
 }

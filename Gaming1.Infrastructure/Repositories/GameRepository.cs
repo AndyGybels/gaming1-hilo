@@ -28,4 +28,14 @@ public class GameRepository : IGameRepository
         _context.Games.Update(game);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Game>> GetAllAsync()
+    {
+        return await _context.Games.ToListAsync();
+    }
+
+    public async Task<IEnumerable<Game>> ListAsync()
+    {
+        return await _context.Games.AsNoTracking().ToListAsync();
+    }
 }

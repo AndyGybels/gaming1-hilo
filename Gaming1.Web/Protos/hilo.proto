@@ -6,6 +6,7 @@ service HiLo {
   rpc StartGame (StartGameRequest) returns (StartGameReply);
   rpc Guess (GuessRequest) returns (GuessReply);
   rpc SubscribeToGame (SubscribeRequest) returns (stream GameUpdate);
+  rpc ListGames (ListGamesRequest) returns (ListGamesReply);
 }
 
 message StartGameRequest { int32 min = 1; int32 max = 2; }
@@ -28,4 +29,19 @@ message GameUpdate {
   int32 attempts = 4;
   bool isOver = 5;
   string winner = 6;
+}
+
+message ListGamesRequest {}
+
+message GameInfo {
+  string gameId = 1;
+  int32 min = 2;
+  int32 max = 3;
+  bool isOver = 4;
+  string winner = 5;
+  int32 attempts = 6;
+}
+
+message ListGamesReply {
+  repeated GameInfo games = 1;
 }

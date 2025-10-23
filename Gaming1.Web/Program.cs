@@ -15,11 +15,10 @@ builder.Services.AddGrpc();
 builder.Services.AddDbContext<GameDbContext>(opts => opts.UseInMemoryDatabase("HiLoGames"));
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 
-// Register handlers from Application layer
 builder.Services.AddScoped<StartGameHandler>();
 builder.Services.AddScoped<MakeGuessHandler>();
+builder.Services.AddScoped<ListGamesHandler>();
 
-// Publisher for streaming updates
 builder.Services.AddSingleton<GameUpdatePublisher>();
 
 var app = builder.Build();
