@@ -28,7 +28,6 @@ public class HiLoService : HiLo.HiLoBase
 
         _logger.LogInformation("Player {Player} guessed {Number} on game {GameId}: {Result}", request.Player, request.Number, request.GameId, result);
 
-        // publish update to subscribers
         _publisher.Publish(Guid.Parse(request.GameId), new GameUpdate
         {
             Type = UpdateType.Guess,
@@ -103,7 +102,6 @@ public class HiLoService : HiLo.HiLoBase
 
     public override async Task<ListGamesReply> ListGames(ListGamesRequest request, ServerCallContext context)
     {
-        // Retrieve all games via application layer
         var games = await _listHandler.Handle(new ListGamesQuery());
 
         var reply = new ListGamesReply();
