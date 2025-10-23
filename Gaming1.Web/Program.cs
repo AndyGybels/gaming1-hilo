@@ -3,21 +3,19 @@ using Gaming1.Infrastructure.Persistence;
 using Gaming1.Infrastructure.Repositories;
 using Gaming1.Application.Commands;
 using Gaming1.Application.Interfaces;
+using Gaming1.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add gRPC
 builder.Services.AddGrpc();
 
-// Infrastructure & application DI - keeping layers separated per Clean Architecture
-// Use an in-memory database for local/dev. Swap out with a real provider in production.
 builder.Services.AddDbContext<GameDbContext>(opts => opts.UseInMemoryDatabase("HiLoGames"));
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 
-builder.Services.AddScoped<StartGameHandler>();
-builder.Services.AddScoped<MakeGuessHandler>();
-builder.Services.AddScoped<ListGamesHandler>();
+builder.Services.AddScoped<ICommandHandler<Game, StartGameCommand>, StartGameCommandHandler>();
+builder.Services.AddScoped<ICommandHandler<MakeGuessResult, MakeGuessCommand>, MakeGuessCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<ListGamesQuery, IEnumerable<Game>>, ListGamesHandler>();
 
 builder.Services.AddSingleton<GameUpdatePublisher>();
 

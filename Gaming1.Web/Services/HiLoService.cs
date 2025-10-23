@@ -1,4 +1,5 @@
 using Gaming1.Application.Commands;
+using Gaming1.Domain.Entities;
 using Grpc.Core;
 using HiLoGame.Grpc;
 
@@ -7,16 +8,20 @@ namespace Gaming1.Web.Services;
 public class HiLoService : HiLo.HiLoBase
 {
     private readonly ILogger<HiLoService> _logger;
-    private readonly StartGameHandler _startHandler;
-    private readonly MakeGuessHandler _guessHandler;
-    private readonly ListGamesHandler _listHandler;
+    private readonly ICommandHandler<Game, StartGameCommand> _startCommandHandler;
+    private readonly ICommandHandler<MakeGuessResult, MakeGuessCommand> _guessCommandHandler;
+    private readonly IQueryHandler<ListGamesQuery, IEnumerable<Game>> _listHandler;
     private readonly GameUpdatePublisher _publisher;
 
-    public HiLoService(ILogger<HiLoService> logger, StartGameHandler startHandler, MakeGuessHandler guessHandler, ListGamesHandler listHandler, GameUpdatePublisher publisher)
+    public HiLoService(ILogger<HiLoService> logger,
+        ICommandHandler<Game, StartGameCommand> startCommandHandler,
+        ICommandHandler<MakeGuessResult, MakeGuessCommand> guessCommandHandler,
+        IQueryHandler<ListGamesQuery, IEnumerable<Game>> listHandler,
+        GameUpdatePublisher publisher)
     {
         _logger = logger;
-        _startHandler = startHandler;
-        _guessHandler = guessHandler;
+        _startCommandHandler = startCommandHandler;
+        _guessCommandHandler = guessCommandHandler;
         _listHandler = listHandler;
         _publisher = publisher;
     }
@@ -24,7 +29,7 @@ public class HiLoService : HiLo.HiLoBase
     public override async Task<GuessReply> Guess(GuessRequest request, ServerCallContext context)
     {
         var (result, isOver, winner, attempts) =
-            await _guessHandler.Handle(new MakeGuessCommand(Guid.Parse(request.GameId), request.Player, request.Number));
+            await _guessCommandHandler.Handle(new MakeGuessCommand(Guid.Parse(request.GameId), request.Player, request.Number), context.CancellationToken);
 
         _logger.LogInformation("Player {Player} guessed {Number} on game {GameId}: {Result}", request.Player, request.Number, request.GameId, result);
 
@@ -49,7 +54,7 @@ public class HiLoService : HiLo.HiLoBase
 
     public override async Task<StartGameReply> StartGame(StartGameRequest request, ServerCallContext context)
     {
-        var game = await _startHandler.Handle(new StartGameCommand(request.Min, request.Max));
+        var game = await _startCommandHandler.Handle(new StartGameCommand(request.Min, request.Max), context.CancellationToken);
 
         _logger.LogInformation("Starting game {GameId} with range [{Min},{Max}]", game.Id, game.Min, game.Max);
 
@@ -102,7 +107,7 @@ public class HiLoService : HiLo.HiLoBase
 
     public override async Task<ListGamesReply> ListGames(ListGamesRequest request, ServerCallContext context)
     {
-        var games = await _listHandler.Handle(new ListGamesQuery());
+        var games = await _listHandler.Handle(new ListGamesQuery(), context.CancellationToken);
 
         var reply = new ListGamesReply();
         foreach (var g in games)
