@@ -24,6 +24,8 @@ public class HiLoService : HiLo.HiLoBase
         var (result, isOver, winner, attempts) =
             await _guessHandler.Handle(new MakeGuessCommand(Guid.Parse(request.GameId), request.Player, request.Number));
 
+        _logger.LogInformation("Player {Player} guessed {Number} on game {GameId}: {Result}", request.Player, request.Number, request.GameId, result);
+
         // publish update to subscribers
         _publisher.Publish(Guid.Parse(request.GameId), new GameUpdate
         {
@@ -47,6 +49,8 @@ public class HiLoService : HiLo.HiLoBase
     public override async Task<StartGameReply> StartGame(StartGameRequest request, ServerCallContext context)
     {
         var game = await _startHandler.Handle(new StartGameCommand(request.Min, request.Max));
+
+        _logger.LogInformation("Starting game {GameId} with range [{Min},{Max}]", game.Id, game.Min, game.Max);
 
         _publisher.Publish(game.Id, new GameUpdate
         {
@@ -73,11 +77,25 @@ public class HiLoService : HiLo.HiLoBase
             return;
         }
 
+        _logger.LogInformation("Client {Peer} subscribed to game {GameId}", context.Peer, gameId);
+
         var reader = _publisher.Subscribe(gameId, context.CancellationToken);
 
-        await foreach (var update in reader.ReadAllAsync(context.CancellationToken))
+        try
         {
-            await responseStream.WriteAsync(update);
+            await foreach (var update in reader.ReadAllAsync(context.CancellationToken))
+            {
+                await responseStream.WriteAsync(update);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation("Subscription for client {Peer} to game {GameId} cancelled", context.Peer, gameId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Error while streaming updates to client {Peer} for game {GameId}", context.Peer, gameId);
+            throw;
         }
     }
 }
