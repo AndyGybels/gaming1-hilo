@@ -5,19 +5,19 @@ namespace Gaming1.Application.Commands;
 
 public record StartGameCommand(int Min, int Max);
 
-public class StartGameHandler
+public class StartGameCommandHandler : ICommandHandler<Game, StartGameCommand>
 {
     private readonly  IGameRepository _repo;
 
-    public StartGameHandler(IGameRepository repo)
+    public StartGameCommandHandler(IGameRepository repo)
     {
         _repo = repo;
     }
 
-    public async Task<Game> Handle(StartGameCommand cmd)
+    public async Task<Game> Handle(StartGameCommand cmd, CancellationToken cancellationToken)
     {
         var game = new Game(cmd.Min, cmd.Max);
-        await _repo.AddAsync(game);
+        await _repo.AddAsync(game, cancellationToken);
         return game;
     }
 }

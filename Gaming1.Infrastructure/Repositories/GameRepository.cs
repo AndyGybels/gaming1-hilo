@@ -14,28 +14,23 @@ public class GameRepository : IGameRepository
         _context = context;
     }
 
-    public async Task<Game?> GetAsync(Guid id)
-        => await _context.Games.FirstOrDefaultAsync(g => g.Id == id);
+    public async Task<Game?> GetAsync(Guid id, CancellationToken cancellationToken)
+        => await _context.Games.SingleOrDefaultAsync(g => g.Id == id, cancellationToken);
 
-    public async Task AddAsync(Game game)
+    public async Task AddAsync(Game game, CancellationToken cancellationToken)
     {
         _context.Games.Add(game);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(Game game)
+    public async Task UpdateAsync(Game game, CancellationToken cancellationToken)
     {
         _context.Games.Update(game);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Game>> GetAllAsync()
+    public async Task<IEnumerable<Game>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await _context.Games.ToListAsync();
-    }
-
-    public async Task<IEnumerable<Game>> ListAsync()
-    {
-        return await _context.Games.AsNoTracking().ToListAsync();
+        return await _context.Games.AsNoTracking().ToListAsync(cancellationToken);
     }
 }
