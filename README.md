@@ -1,35 +1,5 @@
 # HiLo Game (Gaming1)
 
-Minimal instructions
-
-Prerequisite: .NET SDK 9.0+
-
-Run server:
-
-```bash
-cd Gaming1.Web
-dotnet run
-```
-
-Server defaults: http://localhost:5277 and https://localhost:7024
-
-Run client (interactive):
-
-```bash
-cd Clients/HiLo.Client
-dotnet run
-```
-
-Run tests:
-
-```bash
-dotnet test
-```
-
-Start the server first, then run the client.
-
-# HiLo Game (Gaming1)
-
 This repository contains a simple gRPC-based HiLo game server and a console client.
 
 Projects of interest
