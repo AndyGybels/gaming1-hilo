@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <Protobuf Include="Protos\hilo.proto">
-          <GrpcServices>Server</GrpcServices>
+          <GrpcServices>Both</GrpcServices>
           <Access>Public</Access>
           <ProtoCompile>True</ProtoCompile>
           <CompileOutputs>True</CompileOutputs>
