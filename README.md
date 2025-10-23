@@ -1,12 +1,44 @@
 # HiLo Game (Gaming1)
 
+Minimal instructions
+
+Prerequisite: .NET SDK 9.0+
+
+Run server:
+
+```bash
+cd Gaming1.Web
+dotnet run
+```
+
+Server defaults: http://localhost:5277 and https://localhost:7024
+
+Run client (interactive):
+
+```bash
+cd Clients/HiLo.Client
+dotnet run
+```
+
+Run tests:
+
+```bash
+dotnet test
+```
+
+Start the server first, then run the client.
+
+# HiLo Game (Gaming1)
+
 This repository contains a simple gRPC-based HiLo game server and a console client.
 
 Projects of interest
+
 - `Gaming1.Web` - gRPC server (uses an in-memory EF Core database for development).
 - `Clients/HiLo.Client` - Console-based gRPC client that can start or join games.
 
 Prerequisites
+
 - .NET SDK 9.0 or later (the web project targets `net9.0`). You can verify with:
 
 ```bash
@@ -46,14 +78,43 @@ dotnet run
 3. Follow the interactive prompts in the console client to start or join a game and make guesses.
 
 Notes and troubleshooting
+
 - If the server was started with HTTPS only and the client uses the HTTP URL, the client will fail to connect. The server's `Properties/launchSettings.json` includes an HTTP URL (http://localhost:5277) which the client targets by default.
 - If you change the server port, update the client `GrpcChannel.ForAddress("http://localhost:5277")` in `Clients/HiLo.Client/Program.cs` or start the client with environment variables to point to the correct address.
 - The server uses an in-memory database, so games are not persisted between restarts.
 - If you see issues with SSL or certificate trust when using HTTPS locally, run the server on the HTTP endpoint or configure local dev certificates using `dotnet dev-certs https --trust`.
 
 Development tips
+
 - To run both server and client concurrently in separate terminals, start the server first, then run the client.
 - To run from an IDE (Visual Studio / Rider), set the startup projects appropriately: `Gaming1.Web` (server) and `Clients/HiLo.Client` (client) as needed.
 
+Running tests
+
+This repo includes unit tests under the `Tests/Gaming1.UnitTests` project. To run all tests from the repository root:
+
+```bash
+dotnet test
+```
+
+To run only the unit test project explicitly:
+
+```bash
+dotnet test Tests/Gaming1.UnitTests/Gaming1.UnitTests.csproj
+```
+
+If you only want to run a single test or test class, use `--filter` with `dotnet test`, for example:
+
+```bash
+dotnet test --filter FullyQualifiedName~GameTests
+```
+
+Troubleshooting tests
+
+- Make sure the .NET SDK (net9.0) is installed and `dotnet --version` reports a compatible version.
+- If tests fail due to missing environment/state, run `dotnet build` first to ensure projects compile.
+- If tests rely on gRPC or other services, they are unit tests (in-memory) by default; no server startup is required.
+
 License / Attribution
+
 - This repo is for demo purposes.
